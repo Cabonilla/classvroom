@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    const ROOM_ID = "<%= roomId %>"
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+    integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+
+  <script defer src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+
+  <script src="/socket.io/socket.io.js" defer></script>
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> -->
+  
+  <link rel="stylesheet" href="/css/videos.css">
+  <script src="js/jquery.js"></script>
+  <script src="js/html2canvas.js"></script>
+  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css" />
+  <link type="text/css" href="/css/emoji.css" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css"
+    integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
+</head>
+
+<body>
+  <div id="video-grid"></div>
+  <div id="login-grid"></div>
+  <script src="js/jscolor.js"></script>
+
+  <script>
+    jscolor.presets.default = {
+      format: 'rgba'
+    };
+  </script>
+  <!-- <div id="loading">
+    <img id="loading-image" src="uteachist.jpg" alt="Loading..." />
+  </div> -->
+  <video id="myVideo" controls="controls"></video>
+  <video id="output-video" controls="controls"></video>
+  <a id="dl" href="" download="uteachRecording.mp4"></a>
+  <div class="controls" id="controls">
+    <div class="draw">
+      <button class="fa fa-paint-brush fa-lg" id="draw-toggle" type="button" onclick="addDraw()" data-toggle="tooltip"
+        data-placement="bottom" title="drawing mode on/off"></button>
+      <button class="fas fa-arrows-alt-h fa-lg" id="b" type="button" onclick="widthAdjust()" data-toggle="tooltip"
+        data-placement="bottom" title="set canvas width"></button>
+      <input type="text" id="width" name="url" placeholder="1920" maxlength="4" size="2">px</input>
+      <button class="fa fa-arrows-v fa-lg" id="b" type="button" onclick="heightAdjust()" data-toggle="tooltip"
+        data-placement="bottom" title="set canvas height"></button>
+      <input type="text" id="height" name="url" placeholder="1080" maxlength="4" size="2">px</input>
+
+
+    </div>
+    <div class="inserts">
+
+      <!-- <div class="column">
+        <button class="button is-primary has-tooltip-bottom" data-tooltip="Tooltip Text">bottom tooltip</button>
+      </div> -->
+      <label><i class="fa fa-picture-o fa-lg" id="b" data-toggle="tooltip" data-placement="bottom"
+          title="add picture"><input id="file" type="file" value="remove" onchange="addImg(event)"></button></i></label>
+
+      <button class="fa fa-file-video-o fa-lg" id="b" type="button" value="remove" onclick="addVid()"
+        data-toggle="tooltip" data-placement="bottom" title="add video"></button>
+      <button class="fa fa-camera fa-lg" id="snap" type="button" onclick="addWebcam()" data-toggle="tooltip"
+        data-placement="bottom" title="add webcam"></button>
+      <input class="form-control" type="text" id="url" name="url" placeholder="enter youtube url"></input>
+      <input class="btn btn-dark" type="button" value="tubify" onclick=youtubeurl(url) data-toggle="tooltip"
+        data-placement="bottom" title="tubify video"></button>
+
+    </div>
+    <div class="colors">
+      <div class="color-picker" id="b" type="button" data-toggle="tooltip" data-placement="bottom" title="add paper">
+      </div>
+      <button class="fas fa-plus-square fa-lg" id="shadowon" type="button" data-toggle="tooltip" data-placement="bottom"
+        title="shadow on"></button>
+      <button class="fas fa-minus-square fa-lg" id="shadowoff" type="button" data-toggle="tooltip"
+        data-placement="bottom" title="shadow off"></button>
+
+    </div>
+    <div class="shapes">
+      <button class="far fa-circle fa-lg" id="b" type="button" onclick="addCircle()" data-toggle="tooltip"
+        data-placement="bottom" title="add circle"></button>
+      <button class="far fa-square fa-lg" id="b" type="button" onclick="addSquare()" data-toggle="tooltip"
+        data-placement="bottom" title="add square"></button>
+      <button class="" type="button" onclick="addTriangle()" data-toggle="tooltip" data-placement="bottom"
+        title="add triangle"><img id="tri" src="..public/assets/triangle.svg" alt="" srcset=""></button>
+      <button class="fa fa-pencil-square-o fa-lg" id="b" type="button" onclick="addPaper()" data-toggle="tooltip"
+        data-placement="bottom" title="add paper"></button>
+      <button class="fa fa-sticky-note-o fa-lg" id="b" type="button" onclick="addBackground()" data-toggle="tooltip"
+        data-placement="bottom" title="add poster"></button>
+      <button class="fa fa-font fa-lg" id="b" type="text" onclick="addText()" data-toggle="tooltip"
+        data-placement="bottom" title="add text"></button>
+      <button class="fa fa-smile-o fa-lg" id="emoji-toggle" type="text" onclick="addMoji()" data-toggle="tooltip"
+        data-placement="bottom" title="add emojis"></button>
+      <input id="emojis" type="button" data-emojiable="true" data-emoji-input="unicode" />
+      <!-- <button id="ghost" type="button" data-toggle="tooltip" data-placement="bottom" title="add emoji"><input
+          type="textarea" data-emojiable="true" data-emoji-input="unicode" /></button> -->
+
+
+    </div>
+    <div class="zindex">
+      <button class="fa fa-level-up fa-lg" id="b" type="button" value="stack up" onclick="stackUp()"
+        data-toggle="tooltip" data-placement="bottom" title="stack object up"></button>
+      <button class="fa fa-level-down fa-lg" id="b" type="button" value="stack down" onclick="stackDown()"
+        data-toggle="tooltip" data-placement="bottom" title="stack object down"></button>
+    </div>
+    <div class="options">
+      <button class="fa fa-files-o fa-lg" id="b" type="button" value="copy" onclick="copyObj()" data-toggle="tooltip"
+        data-placement="bottom" title="copy object(s)"></button>
+      <button class="fa fa fa-clipboard fa-lg" id="b" type="button" value="copy" onclick="pasteObj()"
+        data-toggle="tooltip" data-placement="bottom" title="paste object(s)"></button>
+      <button class="fa fa-times fa-lg" id="b" type="button" value="remove" onclick="deleteObj()" data-toggle="tooltip"
+        data-placement="bottom" title="delete object(s)"></button>
+      <button class="fa fa-eraser fa-lg" id="clear-canvas" type="button" value="remove" data-toggle="tooltip"
+        data-placement="bottom" title="clear canvas" onclick="clearCanvas()"></button>
+      <button class="fa fa-arrow-down fa-lg" id="b" type="button" value="remove" onclick="downloadCanvas()"
+        data-toggle="tooltip" data-placement="bottom" title="download canvas"></button>
+      <button class="fa fa-cloud-download fa-lg" id="b" type="button" value="remove" onclick="downloadSVGCanvas()"
+        data-toggle="tooltip" data-placement="bottom" title="download svg (vector) canvas"></button>
+
+    </div>
+    <div id="tools" class="tools">
+      <!-- <button id="drawing-mode" class="btn btn-info">Cancel drawing mode</button><br> -->
+      <!-- <button id="clear-canvas" class="btn btn-info">Clear</button><br> -->
+
+      <div id="drawing-mode-options">
+        <div>
+          <label for="drawing-mode-selector">Mode:</label>
+          <select id="drawing-mode-selector">
+            <option id="choice">Pencil</option>
+            <option id="choice">Circle</option>
+            <option id="choice">Spray</option>
+            <option id="choice">Pattern</option>
+
+            <option id="choice">hline</option>
+            <option id="choice">vline</option>
+            <option id="choice">square</option>
+            <option id="choice">diamond</option>
+            <option id="choice">texture</option>
+
+            <option id="choice">CrayonBrush</option>
+            <option id="choice">InkBrush</option>
+            <option id="choice">MarkerBrush</option>
+            <option id="choice">RealSprayBrush</option>
+          </select><br>
+        </div>
+        <div>
+          <label for="drawing-color">Line color:</label>
+          <input id="drawing-color" value="#000000" data-jscolor=""><br>
+          <!-- <input type="color" value="#000000" id="drawing-color"><br> -->
+        </div>
+        <div>
+          <label for="drawing-line-width">Line width:</label>
+          <span class="info" id="info1">15</span><input type="range" value="15" min="0" max="150"
+            id="drawing-line-width" oninput="slideitWidth()"><br>
+        </div>
+        <div>
+          <label for="drawing-shadow-color">Shadow color:</label>
+          <!-- <input type="color" value="#000000" id="drawing-shadow-color"><br> -->
+          <input id="drawing-shadow-color" value="#000000" data-jscolor=""><br>
+        </div>
+        <div>
+          <label for="drawing-shadow-width">Shadow width:</label>
+          <span class="info" id="info2">0</span><input type="range" value="0" min="0" max="50" id="drawing-shadow-width"
+            oninput="slideitSWidth()"><br>
+        </div>
+        <div>
+          <label for="drawing-shadow-offset">Shadow offset:</label>
+          <span class="info" id="info3">0</span><input type="range" value="0" min="0" max="50"
+            id="drawing-shadow-offset" oninput="slideitSOffset()"><br>
+        </div>
+      </div>
+
+    </div>
+    <div id="outfitChange" class="outfitChange">
+      <button class="fa fa-heart fa-lg" id="dark" title="black background"></button>
+      <button class="fa fa-heart-o fa-lg" aria-hidden="true" id="light" title="white background"></button>
+    </div>
+    <div id="misc">
+      <button class="fa fa-question fa-lg" id="question" onclick="instructions()" title="help"></button>
+      <button class="fas fa-circle fa-lg" id="record" title="record (slow, third-party suggested)"></button>
+    </div>
+  </div>
+
+  <div id="capture">
+    <canvas id="c">
+    </canvas>
+  </div>
+
+  <div id="box"></div>
+
+  <script src="js/dat.gui.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+  <script src="js/emoji-picker.js"></script>
+  <script>
+    $("#drawing-line-width").on("input", function (e) {
+      var v = $(this).val();              
+      $("#box").width(v).height(v);   
+    });
+  </script>
+  <script>
+    $(function () {
+      window.emojiPicker = new EmojiPicker.EmojiPicker({
+        emojiable_selector: '[data-emojiable=true]',
+        assetsPath: 'img//',
+        popupButtonClasses: 'fa fa-smile-o fa-lg'
+
+      });
+      window.emojiPicker.discover();
+    });
+  </script>
+  <script src="js/fabric.min.js"></script>
+  <script src="js/fabric-brush.min.js"></script>
+  <script>
+    $(document).bind('mousemove', function (e) {
+      $("#box").css({
+        left: e.pageX - (($("#box").width()) / 2) + "px",
+        top: e.pageY - (($("#box").width()) / 2) + "px"
+      })
+    })
+  </script>
+  <script src="js/ffmpeg.min.js"></script>
+  <script src="js/myScript.js"></script>
+  <script src="https://use.fontawesome.com/79b4fe23a3.js"></script>
+  <script src="script.js" defer></script>
+
+</body>
+
+</html>
